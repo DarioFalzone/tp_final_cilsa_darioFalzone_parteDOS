@@ -1,18 +1,18 @@
 *** Settings ***
-Documentation     Test Suite E2E Robot Framework Sauce Demo
-...               Tests básicos que funcionan sin problemas de sesión
+Documentation     Suite de Pruebas E2E para Sauce Demo con Robot Framework
+...               Pruebas fundamentales de flujo completo y validación de sesión
 Library           SeleniumLibrary
 
 *** Variables ***
-# URLs y Configuración
+# URLs y Configuración Global
 ${URL}                  https://www.saucedemo.com
 ${BROWSER}              Chrome
 
-# Credenciales
+# Credenciales de Acceso
 ${USUARIO_VALIDO}       standard_user
 ${PASSWORD_VALIDO}      secret_sauce
 
-# Locators
+# Selectores (Locators)
 ${LOGIN_USERNAME}       id:user-name
 ${LOGIN_PASSWORD}       id:password
 ${LOGIN_BUTTON}         id:login-button
@@ -29,116 +29,116 @@ ${CHECKOUT_FINISH}      id:finish
 ${CHECKOUT_COMPLETE}    xpath://h2[@class='complete-header']
 
 *** Test Cases ***
-TC001 - Test Completo de Login y Agregar Producto
-    [Documentation]    Test completo desde login hasta agregar un producto al carrito
+TC001 - Flujo Completo: Inicio de Sesión y Selección de Producto
+    [Documentation]    Valida el flujo desde el inicio de sesión hasta la adición de un producto al carrito.
     [Tags]    smoke    e2e
-    # Abrir navegador
+    # Inicialización del navegador
     ${chrome_options}=    Configurar Chrome
     Open Browser    ${URL}    ${BROWSER}    options=${chrome_options}
     Maximize Browser Window
     
-    # Login
+    # Inicio de sesión
     Input Text    ${LOGIN_USERNAME}    ${USUARIO_VALIDO}
     Input Text    ${LOGIN_PASSWORD}    ${PASSWORD_VALIDO}
     Click Button    ${LOGIN_BUTTON}
     
-    # Esperar que cargue la página de productos
+    # Validación de carga del inventario
     Wait Until Element Is Visible    ${PRODUCTS_TITLE}    timeout=10s
     Sleep    2s    # Dar tiempo para que se cierre cualquier popup
     
-    # Intentar cerrar popup si aparece
+    # Manejo preventivo de popups emergentes
     Run Keyword And Ignore Error    Press Keys    None    ESCAPE
     Sleep    0.5s
     
-    # Agregar producto al carrito
+    # Selección y adición de producto
     Wait Until Element Is Visible    ${BTN_ADD_BACKPACK}    timeout=10s
     Click Button    ${BTN_ADD_BACKPACK}
     
-    # Verificar que se agregó al carrito
+    # Verificación visual en el carrito
     Wait Until Element Is Visible    ${CART_BADGE}    timeout=5s
     ${cantidad}=    Get Text    ${CART_BADGE}
     Should Be Equal As Integers    ${cantidad}    1
     
-    # Cerrar navegador
+    # Cierre de sesión y navegador
     Close Browser
 
-TC002 - Test Completo de Checkout
-    [Documentation]    Test completo desde login hasta completar una compra
+TC002 - Flujo Completo de Compra (Checkout)
+    [Documentation]    Valida el proceso completo desde el inicio de sesión hasta la finalización de la compra.
     [Tags]    smoke    e2e
-    # Abrir navegador
+    # Inicialización del navegador
     ${chrome_options}=    Configurar Chrome
     Open Browser    ${URL}    ${BROWSER}    options=${chrome_options}
     Maximize Browser Window
     
-    # Login
+    # Inicio de sesión
     Input Text    ${LOGIN_USERNAME}    ${USUARIO_VALIDO}
     Input Text    ${LOGIN_PASSWORD}    ${PASSWORD_VALIDO}
     Click Button    ${LOGIN_BUTTON}
     
-    # Esperar que cargue la página de productos
+    # Validación de carga del inventario
     Wait Until Element Is Visible    ${PRODUCTS_TITLE}    timeout=10s
     Sleep    2s
     
-    # Intentar cerrar popup
+    # Manejo preventivo de popups
     Run Keyword And Ignore Error    Press Keys    None    ESCAPE
     Sleep    0.5s
     
-    # Agregar producto
+    # Selección de producto
     Wait Until Element Is Visible    ${BTN_ADD_BACKPACK}    timeout=10s
     Click Button    ${BTN_ADD_BACKPACK}
     
-    # Ir al carrito
+    # Navegación al carrito
     Click Element    ${CART_ICON}
     Wait Until Element Is Visible    ${CHECKOUT_BUTTON}    timeout=5s
     
-    # Checkout
+    # Proceso de Checkout
     Click Button    ${CHECKOUT_BUTTON}
     Input Text    ${CHECKOUT_FIRSTNAME}    Juan
     Input Text    ${CHECKOUT_LASTNAME}    Pérez
     Input Text    ${CHECKOUT_POSTAL}    1234
     Click Button    ${CHECKOUT_CONTINUE}
     
-    # Finalizar compra
+    # Finalización de la compra
     Wait Until Element Is Visible    ${CHECKOUT_FINISH}    timeout=5s
     Click Button    ${CHECKOUT_FINISH}
     
-    # Verificar compra completada
+    # Confirmación de orden completada
     Wait Until Element Is Visible    ${CHECKOUT_COMPLETE}    timeout=5s
     Element Should Contain    ${CHECKOUT_COMPLETE}    Thank you for your order
     
-    # Cerrar navegador
+    # Cierre de sesión y navegador
     Close Browser
 
-TC003 - Test de Login con Credenciales Inválidas
-    [Documentation]    Verifica que el sistema rechaza credenciales incorrectas
+TC003 - Validación de Login con Credenciales Inválidas
+    [Documentation]    Verifica que el sistema rechace correctamente el acceso con credenciales erróneas.
     [Tags]    login    negativo
-    # Abrir navegador
+    # Inicialización del navegador
     ${chrome_options}=    Configurar Chrome
     Open Browser    ${URL}    ${BROWSER}    options=${chrome_options}
     Maximize Browser Window
     
-    # Intentar login con credenciales inválidas
+    # Intento de acceso con datos incorrectos
     Input Text    ${LOGIN_USERNAME}    usuario_invalido
     Input Text    ${LOGIN_PASSWORD}    password_incorrecta
     Click Button    ${LOGIN_BUTTON}
     
-    # Verificar mensaje de error
+    # Validación del mensaje de error
     Wait Until Element Is Visible    xpath://h3[@data-test='error']    timeout=5s
     ${error_msg}=    Get Text    xpath://h3[@data-test='error']
     Should Contain    ${error_msg}    Epic sadface
     
-    # Cerrar navegador
+    # Cierre de sesión y navegador
     Close Browser
 
-TC004 - Test de Remover Producto del Carrito
-    [Documentation]    Verifica la funcionalidad de remover productos del carrito
+TC004 - Funcionalidad de Remover Producto del Carrito
+    [Documentation]    Valida la capacidad de eliminar productos previamente agregados al carrito.
     [Tags]    carrito    funcional
-    # Abrir navegador
+    # Inicialización del navegador
     ${chrome_options}=    Configurar Chrome
     Open Browser    ${URL}    ${BROWSER}    options=${chrome_options}
     Maximize Browser Window
     
-    # Login
+    # Inicio de sesión
     Input Text    ${LOGIN_USERNAME}    ${USUARIO_VALIDO}
     Input Text    ${LOGIN_PASSWORD}    ${PASSWORD_VALIDO}
     Click Button    ${LOGIN_BUTTON}
@@ -147,32 +147,32 @@ TC004 - Test de Remover Producto del Carrito
     Run Keyword And Ignore Error    Press Keys    None    ESCAPE
     Sleep    0.5s
     
-    # Agregar producto al carrito
+    # Adición de producto al carrito
     Wait Until Element Is Visible    ${BTN_ADD_BACKPACK}    timeout=10s
     Click Button    ${BTN_ADD_BACKPACK}
     Wait Until Element Is Visible    ${CART_BADGE}    timeout=5s
     ${cantidad}=    Get Text    ${CART_BADGE}
     Should Be Equal As Integers    ${cantidad}    1
     
-    # Remover producto (el botón cambia a "Remove")
+    # Eliminación del producto (el botón cambia a "Remove")
     ${btn_remove}=    Set Variable    id:remove-sauce-labs-backpack
     Click Button    ${btn_remove}
     
-    # Verificar que el badge del carrito desapareció
+    # Verificación de actualización en el carrito
     Wait Until Element Is Not Visible    ${CART_BADGE}    timeout=5s
     
-    # Cerrar navegador
+    # Cierre de sesión y navegador
     Close Browser
 
-TC005 - Test de Ordenamiento de Productos por Precio
-    [Documentation]    Verifica que los productos se ordenan correctamente por precio
+TC005 - Validación de Ordenamiento por Precio
+    [Documentation]    Confirma que el filtro de ordenamiento por precio funcione correctamente.
     [Tags]    productos    ordenamiento
-    # Abrir navegador
+    # Inicialización del navegador
     ${chrome_options}=    Configurar Chrome
     Open Browser    ${URL}    ${BROWSER}    options=${chrome_options}
     Maximize Browser Window
     
-    # Login
+    # Inicio de sesión
     Input Text    ${LOGIN_USERNAME}    ${USUARIO_VALIDO}
     Input Text    ${LOGIN_PASSWORD}    ${PASSWORD_VALIDO}
     Click Button    ${LOGIN_BUTTON}
@@ -181,29 +181,29 @@ TC005 - Test de Ordenamiento de Productos por Precio
     Run Keyword And Ignore Error    Press Keys    None    ESCAPE
     Sleep    0.5s
     
-    # Ordenar por precio: menor a mayor
+    # Aplicación de filtro: Precio (menor a mayor)
     ${sort_dropdown}=    Set Variable    xpath://select[@class='product_sort_container']
     Select From List By Value    ${sort_dropdown}    lohi
     Sleep    1s
     
-    # Verificar que el primer producto es el más barato ($7.99)
+    # Validación del primer ítem (debe ser el de menor precio: $7.99)
     ${primer_precio}=    Get Text    xpath:(//div[@class='inventory_item_price'])[1]
     Should Contain    ${primer_precio}    7.99
     
-    # Cerrar navegador
+    # Cierre de sesión y navegador
     Close Browser
 
 
 
-TC007 - Test de Agregar Múltiples Productos
-    [Documentation]    Verifica que se pueden agregar múltiples productos simultáneamente
+TC006 - Adición de Múltiples Productos
+    [Documentation]    Verifica la capacidad de agregar varios productos al carrito simultáneamente.
     [Tags]    carrito    funcional
-    # Abrir navegador
+    # Inicialización del navegador
     ${chrome_options}=    Configurar Chrome
     Open Browser    ${URL}    ${BROWSER}    options=${chrome_options}
     Maximize Browser Window
     
-    # Login
+    # Inicio de sesión
     Input Text    ${LOGIN_USERNAME}    ${USUARIO_VALIDO}
     Input Text    ${LOGIN_PASSWORD}    ${PASSWORD_VALIDO}
     Click Button    ${LOGIN_BUTTON}
@@ -212,46 +212,46 @@ TC007 - Test de Agregar Múltiples Productos
     Run Keyword And Ignore Error    Press Keys    None    ESCAPE
     Sleep    0.5s
     
-    # Agregar primer producto (Backpack)
+    # Adición del primer producto (Backpack)
     Wait Until Element Is Visible    ${BTN_ADD_BACKPACK}    timeout=10s
     Click Button    ${BTN_ADD_BACKPACK}
     Wait Until Element Is Visible    ${CART_BADGE}    timeout=5s
     
-    # Agregar segundo producto (Bike Light)
+    # Adición del segundo producto (Bike Light)
     ${btn_bike_light}=    Set Variable    id:add-to-cart-sauce-labs-bike-light
     Click Button    ${btn_bike_light}
     Sleep    0.5s
     
-    # Agregar tercer producto (Bolt T-Shirt)
+    # Adición del tercer producto (Bolt T-Shirt)
     ${btn_tshirt}=    Set Variable    id:add-to-cart-sauce-labs-bolt-t-shirt
     Click Button    ${btn_tshirt}
     Sleep    0.5s
     
-    # Verificar que el carrito muestra 3 productos
+    # Verificación del contador en el icono del carrito
     ${cantidad}=    Get Text    ${CART_BADGE}
     Should Be Equal As Integers    ${cantidad}    3
     
-    # Ir al carrito y verificar
+    # Navegación y validación en la página del carrito
     Click Element    ${CART_ICON}
     Wait Until Element Is Visible    ${CHECKOUT_BUTTON}    timeout=5s
     
-    # Contar items en el carrito
+    # Conteo de elementos en la lista
     ${items_count}=    Get Element Count    xpath://div[@class='cart_item']
     Should Be Equal As Integers    ${items_count}    3
     
-    # Cerrar navegador
+    # Cierre de sesión y navegador
     Close Browser
 
 
 *** Keywords ***
 Configurar Chrome
-    [Documentation]    Configura Chrome en modo incógnito para evitar popups de contraseña
+    [Documentation]    Configura las opciones de Chrome, incluyendo modo incógnito para evitar persistencia de sesiones.
     ${chrome_options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
     
-    # USAR MODO INCÓGNITO (esto evita el popup de contraseña)
+    # Activación de modo incógnito (previene popups de guardado de contraseña)
     Evaluate    $chrome_options.add_argument('--incognito')
     
-    # Deshabilitar gestor de contraseñas (por si acaso)
+    # Desactivación del gestor de contraseñas
     ${prefs}=    Create Dictionary
     ...    credentials_enable_service=${False}
     ...    profile.password_manager_enabled=${False}
